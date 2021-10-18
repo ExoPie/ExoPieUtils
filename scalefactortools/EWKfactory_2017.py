@@ -10,7 +10,7 @@ def getEWKW( pt):
 
     weight = 1.0
     if pt < 170: weight  = 0.96648144722
-    elif (pt >= 170.0 and pt <  200.0): weght  = 0.958350896835
+    elif (pt >= 170.0 and pt <  200.0): weight  = 0.958350896835
     elif (pt >= 200.0 and pt < 230.0):  weight = 0.94851320982
     elif (pt >= 230.0 and pt < 260.0):   weight = 0.938303768635
     elif (pt >= 260.0 and pt < 290.0):  weight =  0.929393827915
