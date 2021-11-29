@@ -6,19 +6,10 @@ sys.path.append('../../ExoPieProducer/ExoPieAnalyzer/')
 from Year import era
 
 def jetSF(reader, flav, pt, eta):
-    maxPt = 999.99
-    lowPt = 20.1
-    scale = 1.0
-    if pt > maxPt:
-        pt = maxPt
-        scale = 2
-    if pt < lowPt:
-        pt = lowPt
-        scale = 2
     sf_c = reader.eval_auto_bounds('central', flav, eta, pt)
     sf_low = reader.eval_auto_bounds('down', flav, eta, pt)
     sf_up = reader.eval_auto_bounds('up', flav, eta, pt)
-    btagsf = [sf_c, sf_low*scale, sf_up*scale]
+    btagsf = [sf_c, sf_low, sf_up]
     return btagsf
 
 
@@ -83,16 +74,7 @@ def getJetWeight(pt, eta, flavor, csv, WP, era):
         deepcsvWP = deepCSVLWP
         tag_eff = getBeff_LWP(pt, eta, flavor)
         SF_jet = jetSF(reader0, jetflav(flavor), pt, abs(eta))
-
-    if era == '2016':
-        maxEta = 2.4
-    else:
-        maxEta = 2.5
-    if abs(eta) > maxEta:
-        jetweight = 1.0
-        jetweight_up = 1.0
-        jetweight_down = 1.0
-    elif csv > deepcsvWP:
+    if csv > deepcsvWP:
         jetweight = SF_jet[0]
         jetweight_up = SF_jet[2]
         jetweight_down = SF_jet[1]
@@ -104,7 +86,7 @@ def getJetWeight(pt, eta, flavor, csv, WP, era):
 
 ROOT.gROOT.ProcessLine('.L '+os.path.dirname(__file__) +'/btagSF_Files/BTagCalibrationStandalone.cpp+')
 if era == '2016':
-    calib1 = ROOT.BTagCalibrationStandalone('deepcsv', os.path.dirname(
+    calib1 = ROOT.BTagCalibration('deepcsv', os.path.dirname(
         __file__)+'/btagSF_Files/DeepCSV_2016LegacySF_V1.csv')
     tag_eff_file = ROOT.TFile(os.path.dirname(
         __file__)+'/btagSF_Files/bTagEffs_2016.root')
@@ -112,7 +94,7 @@ if era == '2016':
     deepCSVMWP = 0.6321
     deepCSVTWP = 0.8953
 elif era == '2017':
-    calib1 = ROOT.BTagCalibrationStandalone('deepcsv', os.path.dirname(
+    calib1 = ROOT.BTagCalibration('deepcsv', os.path.dirname(
         __file__)+'/btagSF_Files/DeepCSV_94XSF_V5_B_F.csv')
     tag_eff_file = ROOT.TFile(os.path.dirname(
         __file__)+'/btagSF_Files/bTagEffs_2017.root')
@@ -120,7 +102,7 @@ elif era == '2017':
     deepCSVMWP = 0.4941
     deepCSVTWP = 0.8001
 elif era == '2018':
-    calib1 = ROOT.BTagCalibrationStandalone('deepcsv', os.path.dirname(
+    calib1 = ROOT.BTagCalibration('deepcsv', os.path.dirname(
         __file__)+'/btagSF_Files/DeepCSV_102XSF_V2.csv')
     tag_eff_file = ROOT.TFile(os.path.dirname(
         __file__)+'/btagSF_Files/bTagEffs_2018.root')
@@ -141,12 +123,12 @@ udsg_loose_eff = tag_eff_file.Get('efficiency_lighttag_lwp')
 othersys = ROOT.std.vector('string')()
 othersys.push_back('down')
 othersys.push_back('up')
-reader0 = ROOT.BTagCalibrationStandaloneReader( 0, "central", othersys)
+reader0 = ROOT.BTagCalibrationReader( 0, "central", othersys)
 reader0.load(calib1, 0,  "comb" )
 reader0.load(calib1, 1,  "comb" )
 reader0.load(calib1, 2,  "incl" )
 
-reader1 = ROOT.BTagCalibrationStandaloneReader(1, "central", othersys)
+reader1 = ROOT.BTagCalibrationReader(1, "central", othersys)
 reader1.load(calib1, 0,  "comb")
 reader1.load(calib1, 1,  "comb")
 reader1.load(calib1, 2,  "incl")
@@ -164,7 +146,7 @@ def btag_weight(nJets, ptList, etalist, flavlist, depCSVlist, WP, index=False):
     for i in runOn:
         jweight, jweight_up, jweight_down = getJetWeight(
             ptList[i], etalist[i], flavlist[i], depCSVlist[i], WP, era)
-        if depCSVlist[i] < deepcsvWP:
+        if flavlist[i] != 5:
             fakebWgt *= jweight
             fakebWgt_up *= jweight_up
             fakebWgt_down *= jweight_down
@@ -173,5 +155,3 @@ def btag_weight(nJets, ptList, etalist, flavlist, depCSVlist, WP, index=False):
             bWgt_up *= jweight_up
             bWgt_down *= jweight_down
     return [bWgt, fakebWgt], [bWgt_up, fakebWgt_up], [bWgt_down, fakebWgt_down]
-
-
