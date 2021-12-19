@@ -135,8 +135,9 @@ def getFacDownZ(pt):
     return ewk.getFacDownZ(pt)
 
 def getTopPtReWgt(pt1, pt2):
-    if pt1 >= 500.0: pt1 = 500.0
-    if pt2 >= 500.0: pt2 = 500.0
+    ### https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting#TOP_PAG_corrections_based_on_dat
+    # if pt1 >= 500.0: pt1 = 500.0
+    # if pt2 >= 500.0: pt2 = 500.0
     # w1 = rt.TMath.Exp(0.0615 - 0.0005*pt1)
     # w2 = rt.TMath.Exp(0.0615 - 0.0005*pt2)
     w1 = 0.103*(rt.TMath.Exp(-0.0118*pt1)) - 0.000134*pt1 + 0.973
